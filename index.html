@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+    <title>CVA - Contagem de Valores da Agência</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" sizes="192x192" href="https://cdn.correios.com.br/v2/img/favi-ect.png">
+    
+    <style>
+        body {
+            background-color: #343a40;
+            margin: 0;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        #page-container {
+            position: relative;
+            min-height: 100vh;
+            max-width: 900px; 
+            margin: 0 auto;
+            background-color: #ffffff;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #content-wrap { flex: 1; padding-bottom: 20px; }
+
+        .fcc-btn {
+            background-color: #165A95;
+            color: white;
+            min-width: 200px;
+            padding: 12px 20px;
+            text-align: center;
+            display: inline-block;
+            font-size: 1.1em;
+            border-radius: 10px;
+            box-shadow: 5px 5px 5px black;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+            margin: 10px;
+        }
+
+        .fcc-btn:hover { background-color: #FFBA00; color: #165A95; }
+
+        #footer {
+            background-color: #165A95;
+            color: white;
+            text-align: center;
+            width: 100%;
+            line-height: 2.5rem;
+            font-size: 0.8rem;
+            margin-top: auto;
+        }
+
+        fieldset {
+            border: 2px solid #165A95;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        legend {
+            font-weight: bold;
+            color: #165A95;
+            background: white;
+            padding: 0 10px;
+            font-size: 1.2rem;
+        }
+
+        .input-text {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .grid-valores {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            gap: 10px;
+        }
+        .grid-valores label {
+            background: #f1f1f1;
+            border: 1px solid #165A95;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .grid-valores input[type="radio"]:checked + label { background: #FFBA00; color: #165A95; }
+        .grid-valores input[type="radio"] { display: none; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; table-layout: fixed; }
+        th { background-color: #165A95; color: white; padding: 12px; text-align: center; }
+        td { border-bottom: 1px solid #ddd; padding: 10px; text-align: center; font-weight: bold; word-wrap: break-word; }
+
+        .btn-delete {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 2px 2px 3px black;
+        }
+
+        .resumo-final {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+            background: #f8f9fa;
+            padding: 20px;
+            border: 1px solid #165A95;
+            border-radius: 10px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        .campo-resumo { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .campo-resumo label { font-weight: bold; font-size: 0.9rem; margin-bottom: 5px; }
+        .campo-resumo input {
+            width: 100%;
+            text-align: center;
+            font-size: 1.4rem;
+            font-weight: bold;
+            border: none;
+            background: transparent;
+            color: #165A95;
+            outline: none;
+        }
+
+        /* Banner de Aviso de Dados */
+        #data-notice {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #165A95;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
+        }
+        #data-notice button {
+            background: #FFBA00;
+            color: #165A95;
+            border: none;
+            padding: 8px 20px;
+            margin-left: 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        #printHeader { display: none; text-align: center; border-bottom: 2px solid #165A95; padding-bottom: 10px; }
+
+        @media print {
+            body { background: white; }
+            #page-container { box-shadow: none; max-width: 100%; margin: 0; padding: 0; min-height: auto; }
+            #content-wrap { padding-bottom: 0; }
+            .no-print, .btn-delete, .coluna-acao, .fcc-btn, #data-notice { display: none !important; }
+            #printHeader { display: block !important; }
+            #footer { position: static; color: #333; background: none; border-top: 1px solid #ccc; margin-top: 30px; font-size: 10pt; }
+            .resumo-final { border: 2px solid black !important; display: grid !important; }
+            table, th, td { border: 1px solid black !important; color: black; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="page-container">
+    <div id="content-wrap">
+        <div id="printHeader">
+            <h2>Contagem de Valores da Agência / Caixa</h2>
+            <p id="printDateTime"></p>
+        </div>
+
+        <form id="caixaForm" onsubmit="return false;">
+            <fieldset class="no-print">
+                <legend>Saldo da Agência / Caixa</legend>
+                <label for="saldoAgencia">Saldo (Valor Esperado):</label>
+                <input id="saldoAgencia" class="input-text" type="number" step="0.01" placeholder="0,00">
+            </fieldset>
+
+            <fieldset class="no-print">
+                <legend>Entrada de Valores</legend>
+                <div class="grid-valores">
+                    <input class="itemValue" type="radio" id="v005" name="valor" value="0,05"><label for="v005">R$ 0,05</label>
+                    <input class="itemValue" type="radio" id="v010" name="valor" value="0,10"><label for="v010">R$ 0,10</label>
+                    <input class="itemValue" type="radio" id="v025" name="valor" value="0,25"><label for="v025">R$ 0,25</label>
+                    <input class="itemValue" type="radio" id="v050" name="valor" value="0,50"><label for="v050">R$ 0,50</label>
+                    <input class="itemValue" type="radio" id="v1" name="valor" value="1,00"><label for="v1">R$ 1,00</label>
+                    <input class="itemValue" type="radio" id="v2" name="valor" value="2,00"><label for="v2">R$ 2,00</label>
+                    <input class="itemValue" type="radio" id="v5" name="valor" value="5,00"><label for="v5">R$ 5,00</label>
+                    <input class="itemValue" type="radio" id="v10" name="valor" value="10,00"><label for="v10">R$ 10,00</label>
+                    <input class="itemValue" type="radio" id="v20" name="valor" value="20,00"><label for="v20">R$ 20,00</label>
+                    <input class="itemValue" type="radio" id="v50" name="valor" value="50,00"><label for="v50">R$ 50,00</label>
+                    <input class="itemValue" type="radio" id="v100" name="valor" value="100,00"><label for="v100">R$ 100,00</label>
+                    <input class="itemValue" type="radio" id="v200" name="valor" value="200,00"><label for="v200">R$ 200,00</label>
+                </div>
+                
+                <div style="margin-top:20px; text-align: center;">
+                    <label>Quantidade:</label>
+                    <input id="qtdItens" class="input-text" type="number" min="1" value="1" style="width: 150px; display: inline-block; margin-bottom: 10px;">
+                    <br>
+                    <button type="button" class="fcc-btn" id="captureValueButton">ADICIONAR</button>
+                    <button type="button" class="fcc-btn" id="clearAllButton" style="background-color: #6c757d;">LIMPAR TUDO</button>
+                </div>
+            </fieldset>
+            
+            <fieldset>
+                <legend>Relatório de Conferência</legend>
+                <table id="Resultado">
+                    <thead>
+                        <tr>
+                            <th>Cédula/Moeda</th>
+                            <th>Qtd</th>
+                            <th>Subtotal</th>
+                            <th class="coluna-acao no-print">Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                
+                <div class="resumo-final">
+                    <div class="campo-resumo">
+                        <label>SALDO ESPERADO (-)</label>
+                        <input id="resumoSaldo" type="text" readonly value="R$ 0,00">
+                    </div>
+                    <div class="campo-resumo">
+                        <label>VALOR CONTADO (+)</label>
+                        <input id="resumoContado" type="text" readonly value="R$ 0,00">
+                    </div>
+                    <div class="campo-resumo">
+                        <label>DIFERENÇA FINAL</label>
+                        <input id="resumoDiferenca" type="text" readonly value="R$ 0,00">
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 20px;" class="no-print">
+                    <button type="button" class="fcc-btn" id="printButton">IMPRIMIR</button>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+
+    <div id="footer">
+        Versão 1.6 - Josinei Dornelas - 2026
+    </div>
+</div>
+
+<div id="data-notice">
+    Este site armazena localmente os dados da contagem para evitar perda de informações ao recarregar.
+    <button onclick="dismissNotice()">OK</button>
+</div>
+
+<script>
+    const btnCapture = document.getElementById('captureValueButton');
+    const btnClear = document.getElementById('clearAllButton');
+    const btnPrint = document.getElementById('printButton');
+    const inputSaldoOrigem = document.getElementById('saldoAgencia');
+
+    // --- FUNÇÕES DE PERSISTÊNCIA (LocalStorage) ---
+
+    function saveState() {
+        const rows = document.querySelectorAll('#Resultado tbody tr');
+        const items = [];
+        rows.forEach(row => {
+            items.push({
+                valor: row.cells[0].innerText,
+                qtd: row.cells[1].innerText,
+                subtotal: row.cells[2].innerText
+            });
+        });
+        localStorage.setItem('cva_table_data', JSON.stringify(items));
+        localStorage.setItem('cva_saldo_val', inputSaldoOrigem.value);
+    }
+
+    function loadState() {
+        // Banner de aviso
+        if (!localStorage.getItem('cva_notice_seen')) {
+            document.getElementById('data-notice').style.display = 'block';
+        }
+
+        // Recuperar Saldo
+        const savedSaldo = localStorage.getItem('cva_saldo_val');
+        if (savedSaldo) {
+            inputSaldoOrigem.value = savedSaldo;
+        }
+
+        // Recuperar Itens da Tabela
+        const savedItems = localStorage.getItem('cva_table_data');
+        if (savedItems) {
+            const items = JSON.parse(savedItems);
+            const tbody = document.querySelector('#Resultado tbody');
+            items.forEach(item => {
+                renderRow(item.valor, item.qtd, item.subtotal);
+            });
+            updateCalculos();
+        }
+    }
+
+    function dismissNotice() {
+        localStorage.setItem('cva_notice_seen', 'true');
+        document.getElementById('data-notice').style.display = 'none';
+    }
+
+    // --- LÓGICA DA INTERFACE ---
+
+    function formatarMoeda(valor) {
+        return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function renderRow(valStr, qtd, subStr) {
+        const tbody = document.querySelector('#Resultado tbody');
+        const newRow = tbody.insertRow();
+        
+        newRow.insertCell(0).innerText = valStr;
+        newRow.insertCell(1).innerText = qtd;
+        newRow.insertCell(2).innerText = subStr;
+        
+        const cellAcao = newRow.insertCell(3);
+        cellAcao.className = 'coluna-acao no-print';
+        
+        const btnExcluir = document.createElement('button');
+        btnExcluir.innerHTML = 'X';
+        btnExcluir.className = 'btn-delete';
+        btnExcluir.onclick = function() {
+            newRow.remove();
+            updateCalculos();
+            saveState();
+        };
+        cellAcao.appendChild(btnExcluir);
+    }
+
+    btnCapture.addEventListener('click', function() {
+        const selectedRadio = document.querySelector('input.itemValue:checked');
+        const amount = parseInt(document.getElementById('qtdItens').value, 10);
+
+        if (selectedRadio && amount > 0) {
+            const value = parseFloat(selectedRadio.value.replace(',', '.'));
+            const subtotal = value * amount;
+            
+            renderRow(formatarMoeda(value), amount, formatarMoeda(subtotal));
+            
+            updateCalculos();
+            saveState();
+        } else {
+            alert('Selecione um valor e a quantidade.');
+        }
+    });
+
+    inputSaldoOrigem.addEventListener('input', () => {
+        updateCalculos();
+        saveState();
+    });
+
+    btnClear.addEventListener('click', function() {
+        if (confirm('Deseja apagar todos os dados salvos?')) {
+            localStorage.removeItem('cva_table_data');
+            localStorage.removeItem('cva_saldo_val');
+            inputSaldoOrigem.value = '';
+            document.querySelector('#Resultado tbody').innerHTML = '';
+            updateCalculos();
+        }
+    });
+
+    btnPrint.addEventListener('click', function() {
+        const agora = new Date();
+        document.getElementById('printDateTime').innerText = `Gerado em: ${agora.toLocaleDateString()} às ${agora.toLocaleTimeString()}`;
+        window.print();
+    });
+
+    function updateCalculos() {
+        const rows = document.querySelectorAll('#Resultado tbody tr');
+        let totalContado = 0;
+
+        rows.forEach(row => {
+            const sub = row.cells[2].innerText;
+            // Remove R$, pontos de milhar e troca vírgula por ponto para somar
+            totalContado += parseFloat(sub.replace(/[R$\s.]/g, '').replace(',', '.'));
+        });
+
+        const saldoEsperado = parseFloat(inputSaldoOrigem.value) || 0;
+        const diferenca = totalContado - saldoEsperado;
+
+        document.getElementById('resumoSaldo').value = formatarMoeda(saldoEsperado);
+        document.getElementById('resumoContado').value = formatarMoeda(totalContado);
+        
+        const campoDiferenca = document.getElementById('resumoDiferenca');
+        campoDiferenca.value = (diferenca < 0 ? "- " : "") + formatarMoeda(Math.abs(diferenca));
+        
+        // Cor lógica: Verde se bater, Vermelho se faltar, Azul se sobrar (ou padrão)
+        if (Math.abs(diferenca) < 0.001) {
+            campoDiferenca.style.color = "#28a745";
+        } else if (diferenca < 0) {
+            campoDiferenca.style.color = "#dc3545";
+        } else {
+            campoDiferenca.style.color = "#165A95";
+        }
+    }
+
+    // Carregar dados ao iniciar
+    window.onload = loadState;
+</script>
+</body>
+</html>
